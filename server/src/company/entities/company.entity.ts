@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -32,7 +31,7 @@ export class Company {
   industry!: string;
 
   @Column()
-  employmentCount!: number;
+  employeeCount!: number;
 
   @Column()
   foundedYear!: number;
