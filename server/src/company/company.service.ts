@@ -10,77 +10,108 @@ import { QueryCompanyDto } from './dto/query-company.dto';
 export class CompanyService {
   constructor(
     @InjectRepository(Company)
-    private readonly companyRepository: Repository<Company>
+    private readonly companyRepository: Repository<Company>,
   ) {}
 
   async create(createCompanyDto: CreateCompanyDto) {
     const company = await this.companyRepository.findOne({
-      where: { companyName: createCompanyDto.companyName,
-      }
-    })
+      where: { companyName: createCompanyDto.companyName },
+    });
 
     if (company) {
-      throw new ConflictException('Company already exists',)
+      throw new ConflictException('Company already exists');
     }
 
     const newCompany = this.companyRepository.create(createCompanyDto);
 
-    return this.companyRepository.save(newCompany);
+    const savedCompany = await this.companyRepository.save(newCompany);
+
+    return {
+      success: true,
+      message: 'Company create Successfully',
+      data: savedCompany,
+    };
   }
 
   async findAll(query: QueryCompanyDto) {
-
-    const {  search, city, companyType, page = 1, limit = 10,} = query
+    const { search, city, companyType, page = 1, limit = 10 } = query;
 
     const where: any = {};
-    
+
     if (search) {
       where.companyName = ILike(`%${search}%`);
     }
 
-    if(city) {
+    if (city) {
       where.city = city;
     }
 
-    if(companyType) {
+    if (companyType) {
       where.companyType = companyType;
     }
 
-    const [data, total] = await this.companyRepository.findAndCount({
-       where,
-       skip: (page - 1) * limit,
-       take: limit,
-       order: {
-        createdAt: 'DESC',
-       }
-    })
+    const take = Number(limit);
+    const currentPage = Number(page);
 
-    return {data, total, page, limit};
+    const [companies, total] = await this.companyRepository.findAndCount({
+      where,
+      skip: (currentPage - 1) * take,
+      take,
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Companies fetached successfully',
+      data: companies,
+      pagination: {
+        page: currentPage,
+        limit: take,
+        total,
+        totalPages: Math.ceil(total / take),
+      },
+    };
   }
 
   async findOne(id: number) {
     const company = await this.companyRepository.findOne({
       where: { id },
-    })
+    });
     if (!company) {
-      throw new ConflictException('Company not found')
+      throw new ConflictException('Company not found');
     }
-    return company;
+    return {
+      success: true,
+      message: 'Company fetched successfully',
+      data: company,
+    };
   }
 
   async update(id: number, updateCompanyDto: UpdateCompanyDto) {
-    const company = await this.findOne(id);
+    const companyResponse = await this.findOne(id);
+    const company = companyResponse.data as Company;
 
-    Object.assign(company, updateCompanyDto)
+    Object.assign(company, updateCompanyDto);
 
-    return await  this.companyRepository.save(company);
+    const updatedCompany = await this.companyRepository.save(company);
+    return {
+      success: true,
+      message: 'Company updated successfully',
+      data: updatedCompany,
+    };
   }
 
   async remove(id: number) {
-    const company = await this.findOne(id)
+    const companyResponse = await this.findOne(id);
+    const company = companyResponse.data as Company;
 
     await this.companyRepository.remove(company);
 
-    return { message: 'Company deleted Successfully'}
+    return {
+      success: true,
+      message: 'Company deleted successfully',
+    };
   }
-} 
+}
