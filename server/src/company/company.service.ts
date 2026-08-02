@@ -3,7 +3,8 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from './entities/company.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
+import { QueryCompanyDto } from './dto/query-company.dto';
 
 @Injectable()
 export class CompanyService {
@@ -27,12 +28,34 @@ export class CompanyService {
     return this.companyRepository.save(newCompany);
   }
 
-  async findAll() {
-    return await this.companyRepository.find({
-      order: {
-        createdAt: 'DESC'
-      }
+  async findAll(query: QueryCompanyDto) {
+
+    const {  search, city, companyType, page = 1, limit = 10,} = query
+
+    const where: any = {};
+    
+    if (search) {
+      where.companyName = ILike(`%${search}%`);
+    }
+
+    if(city) {
+      where.city = city;
+    }
+
+    if(companyType) {
+      where.companyType = companyType;
+    }
+
+    const [data, total] = await this.companyRepository.findAndCount({
+       where,
+       skip: (page - 1) * limit,
+       take: limit,
+       order: {
+        createdAt: 'DESC',
+       }
     })
+
+    return {data, total, page, limit};
   }
 
   async findOne(id: number) {
