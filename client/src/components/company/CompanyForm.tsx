@@ -1,8 +1,62 @@
 "use client";
 
+import { companyService } from "@/services/company.service";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 export default function CompanyForm() {
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
+    companyName: "",
+    companyType: "Service",
+    industry: "",
+    employeeCount: 0,
+    foundedYear: new Date().getFullYear(),
+    website: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+    description: "",
+    ceoName: "",
+    hrEmail: "",
+    status: "Active",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]:
+        e.target.type === "number" ? Number(e.target.value) : e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      await companyService.createCompany(formData);
+
+      alert("Company Added Successfully");
+
+      router.push("/companies");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to add company");
+    }
+  };
+
   return (
-    <form className="space-y-4 rounded-lg bg-white p-6 shadow">
+    <form 
+     onSubmit={handleSubmit}
+    className="space-y-4 rounded-lg bg-white p-6 shadow">
       <div>
         <div>
           <label className="mb-2 block font-bold text-gray-700">
@@ -10,7 +64,11 @@ export default function CompanyForm() {
           </label>
           <input
             type="text"
+            name="companyName"
+            value={formData.companyName}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
+            required
           />
         </div>
         <br />
@@ -18,9 +76,14 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">
             Company Type
           </label>
-          <select className="w-full rounded-md border p-2 text-gray-700">
-            <option>Service</option>
-            <option>Product</option>
+          <select
+            name="companyType"
+            value={formData.companyType}
+            onChange={handleChange}
+            className="w-full rounded-md border p-2 text-gray-700"
+          >
+            <option value="Service">Service</option>
+            <option value="Product">Product</option>
           </select>
         </div>
         <br />
@@ -29,7 +92,11 @@ export default function CompanyForm() {
 
           <input
             type="text"
+            name="industry"
+            value={formData.industry}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
+            required
           />
         </div>
         <br />
@@ -39,7 +106,11 @@ export default function CompanyForm() {
           </label>
           <input
             type="number"
+            name="employeeCount"
+            value={formData.employeeCount}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
+            required
           />
         </div>
         <br />
@@ -49,7 +120,11 @@ export default function CompanyForm() {
           </label>
           <input
             type="number"
+            name="foundedYear"
+            value={formData.foundedYear}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
+            required
           />
         </div>
         <br />
@@ -57,6 +132,9 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">Website</label>
           <input
             type="text"
+            name="website"
+            value={formData.website}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
@@ -65,6 +143,9 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">Email</label>
           <input
             type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
@@ -73,6 +154,9 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">Phone</label>
           <input
             type="text"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
@@ -81,6 +165,9 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">City</label>
           <input
             type="text"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
@@ -89,6 +176,9 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">State</label>
           <input
             type="text"
+            name="state"
+            value={formData.state}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
@@ -97,6 +187,9 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">Pincode</label>
           <input
             type="text"
+            name="pincode"
+            value={formData.pincode}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
@@ -105,6 +198,9 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">CEO Name</label>
           <input
             type="text"
+            name="ceoName"
+            value={formData.ceoName}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
@@ -113,21 +209,32 @@ export default function CompanyForm() {
           <label className="mb-2 block font-bold text-gray-700">HR Email</label>
           <input
             type="text"
+            name="hrEmail"
+            value={formData.hrEmail}
+            onChange={handleChange}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
         <br />
         <div>
           <label className="mb-2 block font-bold text-gray-700">Status</label>
-          <select className="w-full rounded-md border p-2 text-gray-700">
-            <option>Active</option>
-            <option>Inactive</option>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="w-full rounded-md border p-2 text-gray-700"
+          >
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
           </select>
         </div>
         <br />
         <div>
           <label className="mb-2 block font-bold text-gray-700">Address</label>
           <textarea
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
             rows={3}
             className="w-full rounded-md border p-2 text-gray-700"
           />
@@ -138,14 +245,27 @@ export default function CompanyForm() {
             Description
           </label>
           <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
             rows={3}
             className="w-full rounded-md border p-2 text-gray-700"
           />
         </div>
-        <br />
-        <button className="mt-6 rounded-md bg-blue-600 px-5 py-2 text-white hover:bg-blue-700">
-          Save Company
-        </button>
+
+        <div>
+          <button
+            type="button"
+            onClick={() => router.push("/companies")}
+            className="mt-6 rounded-md bg-blue-600 px-5 py-2 text-white hover:bg-blue-700">
+            Cancel
+          </button>
+          <button 
+          type="submit"
+          className="mt-6 rounded-md bg-blue-600 px-5 py-2 text-white hover:bg-blue-700">
+            Save Company
+          </button>
+        </div>
       </div>
     </form>
   );
