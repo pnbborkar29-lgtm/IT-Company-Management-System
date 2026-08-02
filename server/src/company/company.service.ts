@@ -1,10 +1,14 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Company } from './entities/company.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Company } from './entities/company.entity';
-import { ILike, Repository } from 'typeorm';
-import { QueryCompanyDto } from './dto/query-company.dto';
 
 @Injectable()
 export class CompanyService {
@@ -13,50 +17,32 @@ export class CompanyService {
     private readonly companyRepository: Repository<Company>,
   ) {}
 
+  // Create Company
   async create(createCompanyDto: CreateCompanyDto) {
-    const company = await this.companyRepository.findOne({
-      where: { companyName: createCompanyDto.companyName },
+    const existingCompany = await this.companyRepository.findOne({
+      where: {
+        companyName: createCompanyDto.companyName,
+      },
     });
 
-    if (company) {
+    if (existingCompany) {
       throw new ConflictException('Company already exists');
     }
 
-    const newCompany = this.companyRepository.create(createCompanyDto);
+    const company = this.companyRepository.create(createCompanyDto);
 
-    const savedCompany = await this.companyRepository.save(newCompany);
+    const savedCompany = await this.companyRepository.save(company);
 
     return {
       success: true,
-      message: 'Company create Successfully',
+      message: 'Company created successfully',
       data: savedCompany,
     };
   }
 
-  async findAll(query: QueryCompanyDto) {
-    const { search, city, companyType, page = 1, limit = 10 } = query;
-
-    const where: any = {};
-
-    if (search) {
-      where.companyName = ILike(`%${search}%`);
-    }
-
-    if (city) {
-      where.city = city;
-    }
-
-    if (companyType) {
-      where.companyType = companyType;
-    }
-
-    const take = Number(limit);
-    const currentPage = Number(page);
-
-    const [companies, total] = await this.companyRepository.findAndCount({
-      where,
-      skip: (currentPage - 1) * take,
-      take,
+  // Get All Companies
+  async findAll() {
+    const companies = await this.companyRepository.find({
       order: {
         createdAt: 'DESC',
       },
@@ -64,24 +50,21 @@ export class CompanyService {
 
     return {
       success: true,
-      message: 'Companies fetached successfully',
+      message: 'Companies fetched successfully',
       data: companies,
-      pagination: {
-        page: currentPage,
-        limit: take,
-        total,
-        totalPages: Math.ceil(total / take),
-      },
     };
   }
 
+  // Get Company By Id
   async findOne(id: number) {
     const company = await this.companyRepository.findOne({
       where: { id },
     });
+
     if (!company) {
-      throw new ConflictException('Company not found');
+      throw new NotFoundException('Company not found');
     }
+
     return {
       success: true,
       message: 'Company fetched successfully',
@@ -89,13 +72,20 @@ export class CompanyService {
     };
   }
 
+  // Update Company
   async update(id: number, updateCompanyDto: UpdateCompanyDto) {
-    const companyResponse = await this.findOne(id);
-    const company = companyResponse.data as Company;
+    const company = await this.companyRepository.findOne({
+      where: { id },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
 
     Object.assign(company, updateCompanyDto);
 
     const updatedCompany = await this.companyRepository.save(company);
+
     return {
       success: true,
       message: 'Company updated successfully',
@@ -103,9 +93,15 @@ export class CompanyService {
     };
   }
 
+  // Delete Company
   async remove(id: number) {
-    const companyResponse = await this.findOne(id);
-    const company = companyResponse.data as Company;
+    const company = await this.companyRepository.findOne({
+      where: { id },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
 
     await this.companyRepository.remove(company);
 

@@ -1,8 +1,9 @@
 export interface Company {
+  id: number;
   companyName: string;
   companyType: string;
   industry: string;
-  employmentCount: number;
+  employeeCount: number;
   foundedYear: number;
   website: string;
   email: string;
@@ -15,4 +16,8 @@ export interface Company {
   ceoName: string;
   hrEmail: string;
   status: string;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export type CreateCompanyInput = Omit<Company, "id" | "createdAt" | "updatedAt">;

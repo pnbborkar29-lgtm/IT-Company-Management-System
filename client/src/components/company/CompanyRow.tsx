@@ -5,7 +5,7 @@ interface CompanyRowProps {
     id: number;
     companyName: string;
     companyType: string;
-    employmentCount: number;
+    employeeCount: number;
     city: string;
     status: string;
   };
@@ -16,7 +16,7 @@ export default function CompanyRow({ company }: CompanyRowProps) {
     <tr className="border-b hover:bg-gray-50">
       <td className="px-4 py-3">{company.companyName}</td>
       <td className="px-4 py-3">{company.companyType}</td>
-      <td className="px-4 py-3">{company.employmentCount}</td>
+      <td className="px-4 py-3">{company.employeeCount}</td>
       <td className="px-4 py-3">{company.city}</td>
       <td className="px-4 py-3">{company.status}</td>
       <td>

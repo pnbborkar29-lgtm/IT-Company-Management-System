@@ -1,8 +1,32 @@
-import CompanyRow from "./CompanyRow";
+"use client"
 
-const companies: any[] = [];
+import { useEffect, useState } from "react";
+import CompanyRow from "./CompanyRow";
+import { Company } from "@/types/company";
+import { companyService } from "@/services/company.service";
 
 export default function CompanyTable() {
+
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(()=>{
+    fetchCompanies();
+  },[]);
+
+  const fetchCompanies = async () =>{
+    try {
+      const response = await companyService.getCompanies();
+      setCompanies(response.data);
+    } catch(error){
+      console.error("Failed to fetch companies", error)
+    } finally {
+      setLoading(false)
+    }
+  };
+  if (loading) {
+    return <p>Loading Companies...</p>;
+  }
   return (
     <div className="overflow-x-auto rounded-lg bg-white shadow">
       <table className="w-full">

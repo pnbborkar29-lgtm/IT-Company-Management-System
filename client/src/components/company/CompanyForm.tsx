@@ -1,13 +1,14 @@
 "use client";
 
 import { companyService } from "@/services/company.service";
+import type { CreateCompanyInput } from "@/types/company";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function CompanyForm() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateCompanyInput>({
     companyName: "",
     companyType: "Service",
     industry: "",
