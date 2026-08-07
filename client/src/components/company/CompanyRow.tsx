@@ -43,7 +43,12 @@ export default function CompanyRow({ company }: CompanyRowProps) {
             <FaEye />
           </button>
 
-          <button title="Edit" className="text-green-600 hover:text-green-800">
+          <button
+           onClick={()=> router.push(`/companies/edit/${company.id}`)}
+            className="text-green-600 hover:text-green-800"
+            title="Edit Company"
+            >
+              
             <FaEdit />
           </button>
 

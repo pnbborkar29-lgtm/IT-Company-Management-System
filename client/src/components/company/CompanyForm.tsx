@@ -3,9 +3,17 @@
 import { companyService } from "@/services/company.service";
 import type { CreateCompanyInput } from "@/types/company";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function CompanyForm() {
+interface CompanyFormProps {
+  companyId?: number;
+  isEdit?: boolean;
+}
+
+export default function CompanyForm({
+  companyId,
+  isEdit = false,
+}: CompanyFormProps) {
   const router = useRouter();
 
   const [formData, setFormData] = useState<CreateCompanyInput>({
@@ -27,6 +35,22 @@ export default function CompanyForm() {
     status: "Active",
   });
 
+  useEffect(() => {
+    if (isEdit && companyId) {
+      fetchCompany();
+    }
+  }, [companyId, isEdit]);
+
+  const fetchCompany = async () => {
+    try {
+      const response = await companyService.getCompanyById(companyId!);
+
+      setFormData(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to fetch company");
+    }
+  };
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -43,21 +67,32 @@ export default function CompanyForm() {
     e.preventDefault();
 
     try {
-      await companyService.createCompany(formData);
+      if (isEdit) {
+        await companyService.updateCompany(companyId!, formData);
+        alert("Company Updated Successfully");
+      } else {
+        await companyService.createCompany(formData);
 
-      alert("Company Added Successfully");
+        alert("Company Added Successfully");
+      }
 
       router.push("/companies");
     } catch (error) {
       console.error(error);
-      alert("Failed to add company");
+
+      alert(isEdit ? "Failed to Update company" : "Failed to add compnay");
     }
   };
 
   return (
-    <form 
-     onSubmit={handleSubmit}
-    className="space-y-4 rounded-lg bg-white p-6 shadow">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-lg bg-white p-6 shadow"
+    >
+
+      <h1 className="mb-6 text-3xl font-bold">
+        {isEdit ? "Edit Company" : "Add Company"}
+      </h1>
       <div>
         <div>
           <label className="mb-2 block font-bold text-gray-700">
@@ -258,13 +293,15 @@ export default function CompanyForm() {
           <button
             type="button"
             onClick={() => router.push("/companies")}
-            className="mt-6 rounded-md bg-blue-600 px-5 py-2 text-white hover:bg-blue-700">
+            className="mt-6 rounded-md bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+          >
             Cancel
           </button>
-          <button 
-          type="submit"
-          className="mt-6 rounded-md bg-blue-600 px-5 py-2 text-white hover:bg-blue-700">
-            Save Company
+          <button
+            type="submit"
+            className="mt-6 rounded-md bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+          >
+            {isEdit ? "Update Company " : "Save Company"}
           </button>
         </div>
       </div>
